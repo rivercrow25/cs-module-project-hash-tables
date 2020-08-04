@@ -31,7 +31,8 @@ class LinkedList:
                     cur.next = cur.next.next
                     if cur.next is None:
                         self.tail = cur.next
-                cur = cur.next
+                else:
+                    cur = cur.next
 
     def find_node(self, key):
         cur = self.head
