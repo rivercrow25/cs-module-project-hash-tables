@@ -9,7 +9,65 @@ class HashTableEntry:
         self.next = None
 
 
-# Hash table can't have fewer than this many slots
+class LinkedList:
+    def __init__(self, head=None):
+        self.head = head
+        self.tail = head
+
+    def add_to_tail(self, node):
+        if self.head is None:
+            self.head = node
+            self.tail = node
+        self.tail.next = node
+        self.tail = node
+
+    def remove_node(self, key):
+        cur = self.head
+        if self.head.key == key:
+            self.head = self.head.next
+        else:
+            while cur.next is not None:
+                if cur.next.key == key:
+                    cur.next = cur.next.next
+                    if cur.next is None:
+                        self.tail = cur.next
+                cur = cur.next
+
+    def find_node(self, key):
+        cur = self.head
+        if self.head.key == key:
+            return self.head.value
+        else:
+            while cur is not None:
+                if cur.key == key:
+                    return cur.value
+                cur = cur.next
+
+    def replace_node(self, key, node):
+        cur = self.head
+        if cur.key == key:
+            node.next = cur.next
+            self.head = node
+            return
+        while cur.next is not None:
+            if cur.next.key == key:
+                node.next = cur.next.next
+                cur.next = node
+                if node.next is None:
+                    self.tail = node
+                return
+        self.add_to_tail(node)
+
+    def get_count(self):
+        count = 0
+        cur = self.head
+        while cur is not None:
+            count += 1
+            cur = cur.next
+        return count
+
+
+        # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
 
@@ -46,7 +104,10 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        pass
+        items = 0
+        for ll in self.lst:
+            items += ll.get_count()
+        return items / self.capacity
 
     def fnv1(self, key):
         """
@@ -89,7 +150,11 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        self.lst[self.hash_index(key)] = value
+        node = HashTableEntry(key, value)
+        if self.lst[self.hash_index(key)] is not None:
+            self.lst[self.hash_index(key)].replace_node(key, node)
+        else:
+            self.lst[self.hash_index(key)] = LinkedList(node)
 
     def delete(self, key):
         """
@@ -100,7 +165,10 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        self.lst[self.hash_index(key)] = None
+        if self.lst[self.hash_index(key)].head.next is None:
+            self.lst[self.hash_index(key)] = None
+        else:
+            self.lst[self.hash_index(key)].remove_node(key)
 
     def get(self, key):
         """
@@ -111,7 +179,9 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return self.lst[self.hash_index(key)]
+        if self.lst[self.hash_index(key)] is not None:
+            return self.lst[self.hash_index(key)].find_node(key)
+        return None
 
     def resize(self, new_capacity):
         """
@@ -121,7 +191,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        pass
+        oldlst = self.lst
+        newlst = [None] * new_capacity
+        self.lst = newlst
+        self.capacity = new_capacity
+        for ll in oldlst:
+            cur = ll.head
+            while cur is not None:
+                self.put(cur.key, cur.value)
+                cur = cur.next
 
 
 if __name__ == "__main__":
@@ -136,16 +214,14 @@ if __name__ == "__main__":
     ht.put("line_7", "Beware the Jubjub bird, and shun")
     ht.put("line_8", 'The frumious Bandersnatch!"')
     ht.put("line_9", "He took his vorpal sword in hand;")
-    ht.put("line_10", "Long time the manxome foe he sought--")
+    # ht.put("line_10", "Long time the manxome foe he sought--")
     ht.put("line_11", "So rested he by the Tumtum tree")
     ht.put("line_12", "And stood awhile in thought.")
-
     print("")
-
     # Test storing beyond capacity
     for i in range(1, 13):
         print(ht.get(f"line_{i}"))
-
+    print(ht.get_load_factor())
     # Test resizing
     # old_capacity = ht.get_num_slots()
     # ht.resize(ht.capacity * 2)
