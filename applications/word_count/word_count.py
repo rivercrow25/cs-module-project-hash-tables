@@ -4,13 +4,12 @@ import re
 def word_count(s):
     # Your code here
     my_dict = {}
-    tr = str.maketrans('', '', '":;,.-+=/\\|[]{}()*^&')
-    s = s.translate(tr).lower()
-    return s
 
     if len(s) > 1:
-        s = re.sub('[\t\r\n".,]', ' ', s)
-        s = s.translate({ord(i): None for i in '":,.-+=/\|[]}{()*^&'})
+        tr = str.maketrans('', '', '":;,.-+=/\\|[]{}()*^&')
+        s = s.translate(tr).lower()
+        s = re.sub('[\t\r\n"]', ' ', s)
+        s.rstrip()
 
     mylst = s.split(" ")
     if s == '':
